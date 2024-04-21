@@ -222,6 +222,28 @@ void unrent(int propn) {
         cout << "Data Saved Successfuly!" << endl;
     }
 }
+void  delistProperty(int propid) {
+
+    MYSQL* conn; conn = mysql_init(NULL);
+    if (!mysql_real_connect(conn, "localhost", "root", "", "houserental", 3306, NULL, 0)) {
+        cout << "Error: " << mysql_error(conn) << endl;
+    }
+    else {
+        //cout << "logged in Databsse" << endl;
+    }
+    string insert = "UPDATE properties SET rented = NULL WHERE Prop_ID =" + to_string(propid);
+    if (mysql_query(conn, insert.c_str())) {
+        cout << "Error: " << mysql_error(conn) << endl;
+    }
+    insert = "DELETE FROM properties WHERE Prop_ID =" + to_string(propid);
+    if (mysql_query(conn, insert.c_str())) {
+        cout << "Error: " << mysql_error(conn) << endl;
+    }
+    else {
+        cout << "Data Saved Successfuly!" << endl;
+    }
+
+}
 void login() {
     string S_no, Name, Phone, Email, User_ID, Passkey;
     Users usr; char ur; int propn;
@@ -274,7 +296,7 @@ void login() {
     }
 
    
-    int c = 0;
+    int c = 0,d=0;
     res = stmt->executeQuery("SELECT * FROM properties WHERE renter='" + User_ID + "'");
 
     cout << "You're currently renting the following:\n";
@@ -284,11 +306,12 @@ void login() {
         c++;
         cout << res->getInt("Prop_ID") << "\t" << res->getInt("size") << "\t" << res->getDouble("price") << "\t" << res->getInt("b") << "\t" << res->getInt("br") << "\t\t" << res->getString("laundary") << "\t" << res->getString("parking") << "\t" << res->getString("lastrev") << "\t" << endl;
     }
+
     if (c > 0) {
         cout << "Would you like to unrent any property:(Y/N)\t";
         cin >> ur;
         if (ur == 'Y') {
-            cout << "Enter the property you want to rent:\t";
+            cout << "Enter the property you want to unrent:\t";
             cin >> propn;
             unrent(propn);
         }
@@ -296,6 +319,30 @@ void login() {
     else {
         cout << "no propperty found\n";
     }
+
+    res = stmt->executeQuery("SELECT * FROM properties WHERE Owner_ID='" + User_ID + "'");
+
+    cout << "You're currently owner of the following:\n";
+    cout << "Prop_ID\t Size \t price \t b \t br \t laundary \t parking \t lastrev\n" << endl;
+
+    while (res->next()) {
+        d++;
+        cout << res->getInt("Prop_ID") << "\t" << res->getInt("size") << "\t" << res->getDouble("price") << "\t" << res->getInt("b") << "\t" << res->getInt("br") << "\t\t" << res->getString("laundary") << "\t" << res->getString("parking") << "\t" << res->getString("lastrev") << "\t" << endl;
+    }
+
+    if (d > 0) {
+        cout << "Would you like to delist any property:(Y/N)\t";
+        cin >> ur;
+        if (ur == 'Y') {
+            cout << "Enter the property you want to delist:\t";
+            cin >> propn;
+            delistProperty(propn);
+        }
+    }
+    else {
+        cout << "no propperty found\n";
+    }
+    
     delete res;
     delete stmt;
     delete con;
